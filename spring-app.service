@@ -1,0 +1,42 @@
+﻿[Unit]
+Description=Spring Boot Application Service
+Documentation=https://docs.spring.io/spring-boot/docs/current/reference/html/
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+# Chay duoi user spring-runner (non-root, no-login shell)
+User=spring-runner
+Group=spring-runner
+
+# Loai dich vu: simple (tien trinh chinh la PID duoc fork)
+Type=simple
+
+# Lenh khoi chay ung dung Spring Boot tai cong 8082
+ExecStart=/usr/bin/java -jar /opt/spring-app/app.jar --server.port=8082
+
+# Thu muc lam viec cua ung dung
+WorkingDirectory=/opt/spring-app
+
+# Bien moi truong ket noi co so du lieu
+Environment="SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/springboot_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+Environment="SPRING_DATASOURCE_USERNAME=spring-admin"
+Environment="SPRING_DATASOURCE_PASSWORD=SpringSecure@123"
+Environment="SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver"
+
+# Cau hinh tu dong khoi dong lai khi ung dung bi crash bat ngo
+Restart=on-failure
+RestartSec=10
+
+# Gioi han quyen he thong (bao mat nang cao)
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Ghi log ra journald (xem bang: journalctl -u spring-app.service)
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=spring-app
+
+[Install]
+# Kich hoat dich vu trong multi-user target (khoi dong tu dong)
+WantedBy=multi-user.target
